@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Attrape Mia ! 🌸</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
+
+  body {
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 30% 20%, #ffd6ec 0%, #ffadd6 50%, #ff85c0 100%);
+    font-family: 'Fredoka One', cursive;
+    user-select: none;
+  }
+
+  .cloud {
+    position: fixed;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50px;
+    animation: driftCloud linear infinite;
+    pointer-events: none;
+  }
+  @keyframes driftCloud {
+    from { transform: translateX(-250px); }
+    to { transform: translateX(110vw); }
+  }
+
+  .flower {
+    position: fixed;
+    animation: flowerFloat linear infinite;
+    pointer-events: none;
+    font-size: 1.8rem;
+    opacity: 0.5;
+    z-index: 1;
+  }
+  @keyframes flowerFloat {
+    0% { transform: translateY(110vh) rotate(0deg); }
+    100% { transform: translateY(-20vh) rotate(360deg); }
+  }
+
+  /* Header */
+  #header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    background: linear-gradient(135deg, rgba(255,180,220,0.92), rgba(255,140,195,0.92));
+    backdrop-filter: blur(10px);
+    border-bottom: 4px solid #ff85c0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(255,100,160,0.3);
+  }
+
+  .score-box {
+    background: white;
+    border-radius: 20px;
+    padding: 7px 18px;
+    border: 3px solid #ff69b4;
+    box-shadow: 0 4px 12px rgba(255,105,180,0.25);
+    text-align: center;
+  }
+  .score-label { font-size: 0.7rem; color: #e0447a; font-family:'Baloo 2',cursive; font-weight:600; display:block; }
+  .score-value { font-size: 1.9rem; color: #e0447a; line-height:1; }
+  .title-header { font-size: 1.4rem; color: white; text-shadow: 2px 2px 0 #e0447a; }
+
+  /* Game area */
+  #game { position: fixed; top: 78px; left: 0; right: 0; bottom: 22px; }
+
+  /* Character */
+  .girl {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 6px 15px rgba(255,80,150,0.45));
+    animation: girlWiggle 1s ease-in-out infinite;
+    z-index: 10;
+  }
+  @keyframes girlWiggle {
+    0%,100% { transform: translate(-50%,-50%) rotate(-4deg) scale(1); }
+    50% { transform: translate(-50%,-50%) rotate(4deg) scale(1.07); }
+  }
+  .girl:active { transform: translate(-50%,-50%) scale(0.82) !important; }
+
+  /* Pop */
+  .pop {
+    position: absolute;
+    pointer-events: none;
+    font-size: 2.2rem;
+    animation: popAnim 0.8s ease-out forwards;
+    z-index: 20;
+    transform: translate(-50%,-50%);
+  }
+  @keyframes popAnim {
+    0% { transform: translate(-50%,-50%) scale(0); opacity:1; }
+    50% { transform: translate(-50%,-90%) scale(1.5); opacity:1; }
+    100% { transform: translate(-50%,-140%) scale(0.8); opacity:0; }
+  }
+
+  .score-pop {
+    position: absolute;
+    pointer-events: none;
+    font-size: 1.9rem;
+    color: #e0447a;
+    font-family: 'Fredoka One', cursive;
+    text-shadow: 2px 2px 0 white;
+    animation: scorePopAnim 0.9s ease-out forwards;
+    z-index: 21;
+    transform: translate(-50%,-50%);
+  }
+  @keyframes scorePopAnim {
+    0% { transform: translate(-50%,-50%) scale(0.5); opacity:1; }
+    60% { transform: translate(-50%,-110%) scale(1.4); opacity:1; }
+    100% { transform: translate(-50%,-160%) scale(1); opacity:0; }
+  }
+
+  /* Start screen */
+  #start-screen {
+    position: fixed; inset: 0;
+    background: linear-gradient(160deg, #ffe0f0, #ffc2e0, #ff9dce);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 200; gap: 18px;
+  }
+
+  .big-girl {
+    width: 190px; height: 190px;
+    animation: bigGirlBounce 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 10px 30px rgba(255,80,150,0.4));
+  }
+  @keyframes bigGirlBounce {
+    0%,100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-18px) rotate(3deg); }
+  }
+
+  .start-title {
+    font-size: 2.8rem; color: #e0447a;
+    text-shadow: 3px 3px 0 #ffb3d9, 5px 5px 0 rgba(224,68,122,0.15);
+    text-align: center; line-height: 1.1;
+  }
+  .start-subtitle {
+    font-family: 'Baloo 2', cursive; font-weight: 600;
+    font-size: 1.05rem; color: #c03070; text-align: center; padding: 0 20px;
+  }
+  .start-btn {
+    background: linear-gradient(135deg, #ff69b4, #ff1493);
+    color: white; border: none; border-radius: 50px;
+    padding: 18px 50px;
+    font-family: 'Fredoka One', cursive; font-size: 1.9rem;
+    box-shadow: 0 8px 25px rgba(255,20,147,0.4), 0 0 0 5px #ffb3d9;
+    cursor: pointer;
+    animation: btnPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes btnPulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.07); }
+  }
+
+  /* Win screen */
+  #win-screen {
+    position: fixed; inset: 0;
+    background: linear-gradient(160deg, #ffe0f0dd, #ffc2e0dd);
+    backdrop-filter: blur(8px);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 200; gap: 14px;
+  }
+  #win-screen.show { display: flex; }
+
+  .win-title {
+    font-size: 3.2rem; color: #e0447a;
+    text-shadow: 3px 3px 0 #ffb3d9; text-align: center;
+    animation: winPop 0.5s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .win-score {
+    font-size: 5rem; color: #ff1493;
+    text-shadow: 4px 4px 0 #e0447a;
+    animation: winPop 0.5s cubic-bezier(.34,1.56,.64,1) 0.2s both;
+  }
+  @keyframes winPop {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+  }
+
+  /* Timer bar */
+  #timer-bar-wrap {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 22px;
+    background: rgba(255,180,220,0.5);
+    z-index: 100;
+  }
+  #timer-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #ff69b4, #ff1493);
+    width: 100%;
+    transition: width 0.1s linear;
+    border-radius: 0 10px 10px 0;
+  }
+
+  .deco-star {
+    position: fixed;
+    animation: decoTwinkle 2s ease-in-out infinite;
+    pointer-events: none; z-index: 1; font-size: 1.4rem;
+  }
+  @keyframes decoTwinkle {
+    0%,100% { opacity: 0.4; transform: scale(0.8) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1.3) rotate(20deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Start Screen -->
+<div id="start-screen">
+  <!-- Big girl character -->
+  <svg class="big-girl" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+    <!-- Body -->
+    <ellipse cx="100" cy="185" rx="38" ry="42" fill="#ff85c0"/>
+    <!-- Dress details -->
+    <ellipse cx="100" cy="195" rx="42" ry="35" fill="#ff69b4" opacity="0.6"/>
+    <ellipse cx="100" cy="205" rx="45" ry="25" fill="#ffb3d9" opacity="0.5"/>
+    <!-- Arms -->
+    <ellipse cx="62" cy="175" rx="10" ry="24" fill="#f5c5a3" transform="rotate(-15 62 175)"/>
+    <ellipse cx="138" cy="175" rx="10" ry="24" fill="#f5c5a3" transform="rotate(15 138 175)"/>
+    <!-- Neck -->
+    <rect x="91" y="125" width="18" height="20" rx="8" fill="#f5c5a3"/>
+    <!-- Head -->
+    <ellipse cx="100" cy="105" rx="42" ry="44" fill="#f5c5a3"/>
+    <!-- Curly hair - back layer -->
+    <ellipse cx="100" cy="72" rx="46" ry="30" fill="#4a2010"/>
+    <ellipse cx="60" cy="90" rx="22" ry="28" fill="#3d1a0c"/>
+    <ellipse cx="140" cy="90" rx="22" ry="28" fill="#3d1a0c"/>
+    <!-- Curly bits left -->
+    <circle cx="50" cy="100" r="14" fill="#3d1a0c"/>
+    <circle cx="42" cy="112" r="11" fill="#4a2010"/>
+    <circle cx="48" cy="125" r="9" fill="#3d1a0c"/>
+    <!-- Curly bits right -->
+    <circle cx="150" cy="100" r="14" fill="#3d1a0c"/>
+    <circle cx="158" cy="112" r="11" fill="#4a2010"/>
+    <circle cx="152" cy="125" r="9" fill="#3d1a0c"/>
+    <!-- Top curls -->
+    <circle cx="80" cy="65" r="13" fill="#4a2010"/>
+    <circle cx="100" cy="60" r="14" fill="#3d1a0c"/>
+    <circle cx="120" cy="65" r="13" fill="#4a2010"/>
+    <circle cx="70" cy="75" r="10" fill="#3d1a0c"/>
+    <circle cx="130" cy="75" r="10" fill="#4a2010"/>
+    <!-- Face -->
+    <!-- Cheeks -->
+    <circle cx="78" cy="115" r="11" fill="#ffb3b3" opacity="0.6"/>
+    <circle cx="122" cy="115" r="11" fill="#ffb3b3" opacity="0.6"/>
+    <!-- Eyes - big dark brown -->
+    <ellipse cx="87" cy="103" rx="11" ry="12" fill="white"/>
+    <ellipse cx="113" cy="103" rx="11" ry="12" fill="white"/>
+    <ellipse cx="87" cy="105" rx="8" ry="9" fill="#2d1208"/>
+    <ellipse cx="113" cy="105" rx="8" ry="9" fill="#2d1208"/>
+    <!-- Eye shine -->
+    <circle cx="90" cy="101" r="3.5" fill="white"/>
+    <circle cx="116" cy="101" r="3.5" fill="white"/>
+    <circle cx="84" cy="107" r="1.5" fill="white" opacity="0.7"/>
+    <circle cx="110" cy="107" r="1.5" fill="white" opacity="0.7"/>
+    <!-- Eyebrows -->
+    <path d="M78 92 Q87 88 96 92" stroke="#2d1208" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M104 92 Q113 88 122 92" stroke="#2d1208" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- Nose -->
+    <ellipse cx="100" cy="116" rx="4" ry="3" fill="#e8a882" opacity="0.7"/>
+    <!-- Mouth - slight open like photo -->
+    <path d="M90 126 Q100 132 110 126" stroke="#c0706a" stroke-width="2.5" fill="#ffaaaa" stroke-linecap="round"/>
+    <!-- Hair bow -->
+    <g transform="translate(130, 68)">
+      <ellipse cx="-10" cy="0" rx="12" ry="8" fill="#ff1493" transform="rotate(-15 -10 0)"/>
+      <ellipse cx="10" cy="0" rx="12" ry="8" fill="#ff1493" transform="rotate(15 10 0)"/>
+      <circle cx="0" cy="0" r="6" fill="#ff69b4"/>
+    </g>
+    <!-- Little earring dots -->
+    <circle cx="58" cy="115" r="3" fill="#ffd700"/>
+    <circle cx="142" cy="115" r="3" fill="#ffd700"/>
+    <!-- Legs -->
+    <ellipse cx="86" cy="225" rx="11" ry="18" fill="#f5c5a3"/>
+    <ellipse cx="114" cy="225" rx="11" ry="18" fill="#f5c5a3"/>
+    <!-- Shoes -->
+    <ellipse cx="86" cy="237" rx="13" ry="7" fill="#ff1493"/>
+    <ellipse cx="114" cy="237" rx="13" ry="7" fill="#ff1493"/>
+  </svg>
+
+  <div class="start-title">Attrape<br>Mia ! 🌸</div>
+  <div class="start-subtitle">Clique sur Mia le plus vite possible ! 💖</div>
+  <button class="start-btn" onclick="startGame()">▶ Jouer !</button>
+</div>
+
+<!-- Win screen -->
+<div id="win-screen">
+  <div class="win-title">🎉 Bravo ! 🎉</div>
+  <div style="font-family:'Baloo 2',cursive;font-weight:600;font-size:1.1rem;color:#c03070;">Tu as attrapé Mia</div>
+  <div class="win-score" id="final-score">0</div>
+  <div style="font-family:'Baloo 2',cursive;font-weight:600;font-size:1.1rem;color:#c03070;">fois ! 🌸</div>
+  <div style="font-size:2.5rem;margin:5px 0;">🌸💖🎀✨🌟💕⭐</div>
+  <button class="start-btn" style="margin-top:8px;" onclick="restartGame()">🔄 Rejouer !</button>
+</div>
+
+<!-- Game UI -->
+<div id="header" style="display:none;">
+  <div class="score-box">
+    <span class="score-label">Score</span>
+    <span class="score-value" id="score-display">0</span>
+  </div>
+  <div class="title-header">🌸 Mia !</div>
+  <div class="score-box">
+    <span class="score-label">Temps</span>
+    <span class="score-value" id="time-display">30</span>
+  </div>
+</div>
+
+<div id="game" style="display:none;"></div>
+
+<div id="timer-bar-wrap" style="display:none;">
+  <div id="timer-bar"></div>
+</div>
+
+<!-- Deco -->
+<span class="deco-star" style="top:12%;left:4%;animation-delay:0s">⭐</span>
+<span class="deco-star" style="top:22%;right:6%;animation-delay:0.6s">✨</span>
+<span class="deco-star" style="bottom:18%;left:7%;animation-delay:1.2s">🌟</span>
+<span class="deco-star" style="bottom:28%;right:4%;animation-delay:0.3s">💕</span>
+
+<script>
+  // Clouds
+  [{w:120,h:38,top:'7%',dur:20,delay:0},{w:85,h:30,top:'18%',dur:27,delay:-9},
+   {w:140,h:48,top:'55%',dur:24,delay:-13},{w:95,h:34,top:'72%',dur:32,delay:-4}]
+  .forEach(d => {
+    const c = document.createElement('div');
+    c.className = 'cloud';
+    c.style.cssText = `width:${d.w}px;height:${d.h}px;top:${d.top};animation-duration:${d.dur}s;animation-delay:${d.delay}s;left:-200px;`;
+    document.body.appendChild(c);
+  });
+
+  // Flowers
+  ['🌸','🌺','🌷','💐','🌼','💕'].forEach((f,i) => {
+    const el = document.createElement('span');
+    el.className = 'flower';
+    el.textContent = f;
+    el.style.cssText = `left:${8+i*16}%;animation-duration:${7+i*2}s;animation-delay:${-i*1.8}s;`;
+    document.body.appendChild(el);
+  });
+
+  const GAME_TIME = 30;
+  let score = 0, timeLeft = GAME_TIME;
+  let timerInterval = null, moveInterval = null, girl = null;
+
+  function girlSVG() {
+    return `<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+      <!-- Body -->
+      <ellipse cx="100" cy="190" rx="36" ry="40" fill="#ff85c0"/>
+      <ellipse cx="100" cy="200" rx="40" ry="32" fill="#ff69b4" opacity="0.6"/>
+      <ellipse cx="100" cy="210" rx="43" ry="22" fill="#ffb3d9" opacity="0.5"/>
+      <!-- Arms -->
+      <ellipse cx="64" cy="178" rx="9" ry="22" fill="#f5c5a3" transform="rotate(-15 64 178)"/>
+      <ellipse cx="136" cy="178" rx="9" ry="22" fill="#f5c5a3" transform="rotate(15 136 178)"/>
+      <!-- Neck -->
+      <rect x="92" y="128" width="16" height="18" rx="7" fill="#f5c5a3"/>
+      <!-- Head -->
+      <ellipse cx="100" cy="108" rx="40" ry="42" fill="#f5c5a3"/>
+      <!-- Curly hair back -->
+      <ellipse cx="100" cy="75" rx="44" ry="28" fill="#4a2010"/>
+      <ellipse cx="62" cy="93" rx="21" ry="27" fill="#3d1a0c"/>
+      <ellipse cx="138" cy="93" rx="21" ry="27" fill="#3d1a0c"/>
+      <!-- Curly bits left -->
+      <circle cx="52" cy="103" r="13" fill="#3d1a0c"/>
+      <circle cx="44" cy="115" r="10" fill="#4a2010"/>
+      <circle cx="50" cy="128" r="8" fill="#3d1a0c"/>
+      <!-- Curly bits right -->
+      <circle cx="148" cy="103" r="13" fill="#3d1a0c"/>
+      <circle cx="156" cy="115" r="10" fill="#4a2010"/>
+      <circle cx="150" cy="128" r="8" fill="#3d1a0c"/>
+      <!-- Top curls -->
+      <circle cx="82" cy="68" r="13" fill="#4a2010"/>
+      <circle cx="100" cy="63" r="14" fill="#3d1a0c"/>
+      <circle cx="118" cy="68" r="13" fill="#4a2010"/>
+      <circle cx="72" cy="78" r="10" fill="#3d1a0c"/>
+      <circle cx="128" cy="78" r="10" fill="#4a2010"/>
+      <!-- Cheeks -->
+      <circle cx="79" cy="118" r="10" fill="#ffb3b3" opacity="0.55"/>
+      <circle cx="121" cy="118" r="10" fill="#ffb3b3" opacity="0.55"/>
+      <!-- Eyes big dark -->
+      <ellipse cx="87" cy="106" rx="11" ry="12" fill="white"/>
+      <ellipse cx="113" cy="106" rx="11" ry="12" fill="white"/>
+      <ellipse cx="87" cy="108" rx="8" ry="9" fill="#2d1208"/>
+      <ellipse cx="113" cy="108" rx="8" ry="9" fill="#2d1208"/>
+      <circle cx="90" cy="104" r="3.5" fill="white"/>
+      <circle cx="116" cy="104" r="3.5" fill="white"/>
+      <circle cx="84" cy="110" r="1.5" fill="white" opacity="0.7"/>
+      <circle cx="110" cy="110" r="1.5" fill="white" opacity="0.7"/>
+      <!-- Eyebrows -->
+      <path d="M79 94 Q87 90 96 94" stroke="#2d1208" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M104 94 Q113 90 121 94" stroke="#2d1208" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- Nose -->
+      <ellipse cx="100" cy="119" rx="3.5" ry="2.8" fill="#e8a882" opacity="0.6"/>
+      <!-- Mouth -->
+      <path d="M91 129 Q100 135 109 129" stroke="#c0706a" stroke-width="2.5" fill="#ffaaaa" stroke-linecap="round"/>
+      <!-- Hair bow -->
+      <g transform="translate(132, 70)">
+        <ellipse cx="-10" cy="0" rx="12" ry="8" fill="#ff1493" transform="rotate(-15 -10 0)"/>
+        <ellipse cx="10" cy="0" rx="12" ry="8" fill="#ff1493" transform="rotate(15 10 0)"/>
+        <circle cx="0" cy="0" r="6" fill="#ff69b4"/>
+      </g>
+      <!-- Earrings -->
+      <circle cx="60" cy="118" r="3" fill="#ffd700"/>
+      <circle cx="140" cy="118" r="3" fill="#ffd700"/>
+      <!-- Legs -->
+      <ellipse cx="87" cy="228" rx="10" ry="17" fill="#f5c5a3"/>
+      <ellipse cx="113" cy="228" rx="10" ry="17" fill="#f5c5a3"/>
+      <!-- Shoes -->
+      <ellipse cx="87" cy="240" rx="12" ry="6" fill="#ff1493"/>
+      <ellipse cx="113" cy="240" rx="12" ry="6" fill="#ff1493"/>
+    </svg>`;
+  }
+
+  function getRandomPos() {
+    const margin = 65, headerH = 88, footerH = 32;
+    return {
+      x: margin + Math.random() * (window.innerWidth - margin * 2),
+      y: headerH + margin + Math.random() * (window.innerHeight - headerH - footerH - margin * 2)
+    };
+  }
+
+  function moveBird() {
+    if (!girl) return;
+    const pos = getRandomPos();
+    girl.style.left = pos.x + 'px';
+    girl.style.top = pos.y + 'px';
+    girl.style.transform = `translate(-50%, -50%) scaleX(${Math.random() > 0.5 ? 1 : -1})`;
+  }
+
+  function showPop(x, y) {
+    const emojis = ['💕','🌸','⭐','✨','💖','🎀','🌟','😄'];
+    const pop = document.createElement('div');
+    pop.className = 'pop';
+    pop.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    pop.style.left = x + 'px'; pop.style.top = y + 'px';
+    document.getElementById('game').appendChild(pop);
+    setTimeout(() => pop.remove(), 800);
+
+    // MIA text pop!
+    const mia = document.createElement('div');
+    mia.className = 'score-pop';
+    mia.textContent = '✨ MIA ! ✨';
+    mia.style.left = x + 'px'; mia.style.top = (y - 10) + 'px';
+    mia.style.fontSize = '2rem';
+    mia.style.color = '#ff1493';
+    mia.style.textShadow = '2px 2px 0 white, -1px -1px 0 #ffb3d9';
+    document.getElementById('game').appendChild(mia);
+    setTimeout(() => mia.remove(), 900);
+
+    const sp = document.createElement('div');
+    sp.className = 'score-pop';
+    sp.textContent = '+1 ⭐';
+    sp.style.left = (x + 22) + 'px'; sp.style.top = (y - 22) + 'px';
+    document.getElementById('game').appendChild(sp);
+    setTimeout(() => sp.remove(), 900);
+  }
+
+  function catchGirl(e) {
+    e.stopPropagation();
+    score++;
+    document.getElementById('score-display').textContent = score;
+    const rect = girl.getBoundingClientRect();
+    showPop(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    girl.style.filter = 'brightness(1.8) drop-shadow(0 0 18px white)';
+    setTimeout(() => { if (girl) girl.style.filter = 'drop-shadow(0 6px 15px rgba(255,80,150,0.45))'; }, 150);
+    moveBird();
+  }
+
+  function startGame() {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('header').style.display = 'flex';
+    document.getElementById('game').style.display = 'block';
+    document.getElementById('timer-bar-wrap').style.display = 'block';
+
+    score = 0; timeLeft = GAME_TIME;
+    document.getElementById('score-display').textContent = '0';
+    document.getElementById('time-display').textContent = GAME_TIME;
+    document.getElementById('timer-bar').style.width = '100%';
+    document.getElementById('timer-bar').style.background = 'linear-gradient(90deg, #ff69b4, #ff1493)';
+
+    const game = document.getElementById('game');
+    game.innerHTML = '';
+
+    girl = document.createElement('div');
+    girl.className = 'girl';
+    girl.innerHTML = girlSVG();
+    girl.addEventListener('click', catchGirl);
+    girl.addEventListener('touchstart', catchGirl, { passive: false });
+    game.appendChild(girl);
+
+    const pos = getRandomPos();
+    girl.style.left = pos.x + 'px';
+    girl.style.top = pos.y + 'px';
+
+    moveInterval = setInterval(moveBird, 2200);
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('time-display').textContent = timeLeft;
+      document.getElementById('timer-bar').style.width = (timeLeft / GAME_TIME * 100) + '%';
+      if (timeLeft <= 10) {
+        document.getElementById('timer-bar').style.background = 'linear-gradient(90deg, #ff4444, #ff0000)';
+      }
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+  }
+
+  function endGame() {
+    clearInterval(timerInterval);
+    clearInterval(moveInterval);
+    girl = null;
+    document.getElementById('final-score').textContent = score;
+    document.getElementById('win-screen').classList.add('show');
+
+    for (let i = 0; i < 45; i++) {
+      setTimeout(() => {
+        const c = document.createElement('div');
+        c.style.cssText = `position:fixed;left:${Math.random()*100}vw;top:${Math.random()*100}vh;font-size:${1.5+Math.random()*2}rem;pointer-events:none;z-index:300;animation:popAnim 1s ease-out forwards;`;
+        c.textContent = ['🌸','💖','⭐','🎀','✨','🌟','💕','🎉'][Math.floor(Math.random()*8)];
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 1200);
+      }, i * 55);
+    }
+  }
+
+  function restartGame() {
+    document.getElementById('win-screen').classList.remove('show');
+    document.getElementById('game').innerHTML = '';
+    startGame();
+  }
+</script>
+</body>
+</html>
